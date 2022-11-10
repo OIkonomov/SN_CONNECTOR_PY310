@@ -1,0 +1,33 @@
+TYPE = "Player"
+CREDENTIAL = "YES"
+FILTER = "NO"
+SILO = "NO"
+REALM = "NO"
+DATE = "YES"
+
+SQL_REQ =   '''
+
+SELECT
+    DATE(CLIENT_TIME) AS "DATE",
+    CLIENT_TIME AS "TIME",
+    REALM,
+    USER_ID AS "DEVICE",
+    FED_ID AS "FED",
+    PROGRESS_INDEX01 AS "LEVEL",
+    ITEM_NAME AS "HERO",
+    PROGRESS_INT AS "ACTION",
+    ITEM_LEVEL AS "HERO_LEVEL",
+    STAR_LEVEL AS "STARS"
+FROM
+    "ELEPHANT_DB"."AOV"."PROGRESSION"
+WHERE
+    SERVER_TIME >= '{st_date}'
+    AND SERVER_TIME < '{end_date}'
+    AND FED_ID = '{account}'
+ORDER BY 
+    HERO ASC,
+    TIME ASC
+LIMIT
+    10000
+;
+'''

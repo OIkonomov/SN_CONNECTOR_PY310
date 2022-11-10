@@ -1,0 +1,62 @@
+TYPE = "Alliance"
+CREDENTIAL = "NO"
+FILTER = "NO"
+SILO = "NO"
+REALM = "YES"
+DATE = "YES"
+
+SQL_REQ =   '''
+
+WITH DET AS
+    (SELECT
+        REALM,
+        DATE(CLIENT_TIME) AS "DATE",
+        HOUR(CLIENT_TIME) AS "HOUR",
+        FED_ID,
+        COUNT(DISTINCT HOUR) OVER(PARTITION BY DATE,FED_ID) AS "TOTAL_HOURS",
+        COUNT(DISTINCT COMBAT_ID) AS "BATTLES",
+        SUM(BATTLES) OVER(PARTITION BY DATE,FED_ID) AS "TOTAL_BATTLES_PER_DAY"
+
+    FROM
+        "ELEPHANT_DB"."AOV"."COMBAT_INTERACTION"
+
+    WHERE
+        CLIENT_TIME >= '{st_date}'
+        AND CLIENT_TIME < '{end_date}'
+        AND REALM = '{realm}'
+
+    GROUP BY
+        DATE,
+        HOUR,
+        REALM,
+        FED_ID
+
+    ORDER BY
+        DATE ASC,
+        HOUR ASC
+
+    LIMIT 100000)
+
+SELECT
+    REALM,
+    DATE,
+    FED_ID,
+    TOTAL_HOURS,
+    TOTAL_BATTLES_PER_DAY,
+    (TOTAL_BATTLES_PER_DAY/TOTAL_HOURS)::INT AS "AVG_PER_HOUR"
+
+FROM 
+    DET
+
+GROUP BY
+    REALM,
+    DATE,
+    FED_ID,
+    TOTAL_HOURS,
+    TOTAL_BATTLES_PER_DAY
+
+ORDER BY
+    TOTAL_HOURS DESC,
+    TOTAL_BATTLES_PER_DAY DESC
+;
+'''

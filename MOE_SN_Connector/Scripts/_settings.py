@@ -1,0 +1,10 @@
+
+stylesheet = 'Black'
+font_size = 'small_font'
+user = ''
+password = ''
+account = ''
+database = ''
+role = ''
+open_folder = 'NO'
+web_login = 'LOCAL_USER'

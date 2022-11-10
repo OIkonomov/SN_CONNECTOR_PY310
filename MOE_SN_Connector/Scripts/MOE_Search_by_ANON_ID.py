@@ -1,0 +1,22 @@
+TYPE = "Alliance"
+CREDENTIAL = "NO"
+FILTER = "ANON_ID"
+SILO = "NO"
+REALM = "NO"
+DATE = "NO"
+
+SQL_REQ = '''
+SELECT
+    ANON_ID,
+    FED_ID
+FROM
+    "ELEPHANT_DB"."MOE"."PLAYER_CONNECTION_REPORT"
+WHERE
+    ANON_ID = '{filter_value}'
+GROUP BY 
+    ANON_ID,
+    FED_ID
+
+LIMIT 10000
+;
+'''

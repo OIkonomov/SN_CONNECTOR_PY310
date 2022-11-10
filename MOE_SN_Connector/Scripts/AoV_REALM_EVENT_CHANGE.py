@@ -1,0 +1,23 @@
+TYPE = "Alliance"
+CREDENTIAL = "NO"
+FILTER = "NO"
+SILO = "NO"
+REALM = "YES"
+DATE = "YES"
+
+SQL_REQ =   '''
+
+SELECT
+    *
+FROM "ELEPHANT_DB"."AOV"."REALM_EVENT_CHANGE"
+
+WHERE
+    SERVER_TIME >= '{st_date}'
+    AND SERVER_TIME < '{end_date}'
+    AND REALM = {realm}
+
+ORDER BY CLIENT_TIME ASC
+
+LIMIT 10000
+;
+'''

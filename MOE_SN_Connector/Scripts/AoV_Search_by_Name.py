@@ -1,0 +1,39 @@
+TYPE = "Alliance"
+CREDENTIAL = "NO"
+FILTER = "NAME(You can search by part of the name)"
+SILO = "NO"
+REALM = "NO"
+DATE = "YES"
+
+SQL_REQ =   '''
+SELECT DISTINCT
+    MAX(CLIENT_TIME) AS "LAST_USED",
+    DATA_CENTER_ID AS "SILO",
+    REALM,
+    PLATFORM,
+    USER_ID AS "DEVICE",
+    ABOUT_ID AS "PL_ID",
+    FED_ID AS "FED",
+    MAX(PROGRESS_INDEX01) AS "LEVEL",
+    INGAME_NICKNAME_ACTIVE AS "NAME",
+    PLAYER_ID
+FROM
+    "ELEPHANT_DB"."AOV"."PLAYER_CONNECTION_REPORT"
+WHERE
+    CLIENT_TIME >= '{st_date}'
+    AND CLIENT_TIME < '{end_date}'
+    AND LOWER(NAME::STRING) LIKE LOWER('%{filter_value}%')
+GROUP BY
+    SILO,
+    REALM,
+    DEVICE,
+    PLATFORM,
+    FED,
+    PL_ID,
+    NAME,
+    PLAYER_ID
+ORDER BY
+    LAST_USED DESC
+LIMIT 10000
+;
+'''

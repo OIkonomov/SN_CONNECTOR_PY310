@@ -1,0 +1,64 @@
+TYPE = "Player"
+CREDENTIAL = "YES"
+FILTER = "NO"
+SILO = "NO"
+REALM = "NO"
+DATE = "YES"
+
+SQL_REQ =   '''
+SELECT
+    DATE(CLIENT_TIME) AS "DATE",
+    MIN(CLIENT_TIME) AS "FROM_",
+    MAX(CLIENT_TIME) AS "_TO",
+    DATA_CENTER_ID AS "SILO",
+    EVENT_DATA:realm_id_current::INT AS "REALM",
+    FED_ID AS "FED",
+    MAX(EVENT_DATA:progress_index02::INT) AS "CASTLE_LEVEL",
+    T_EVENT.NAME AS "INT_NAME",
+    EVENT_DATA:source_player_fed_id::STRING AS "ENEMY_FED",
+    COUNT(FED) AS "NUMBER_OF_ACTIONS",
+    SUM(EVENT_DATA:hard_currency_earned::INT) AS "GOLD_EARNED",
+    SUM(EVENT_DATA:hard_currency_spent::INT) AS "GOLD_SPENT",
+    SUM(EVENT_DATA:soft_currency1_earned::INT) AS "FOOD_EARNED",
+    SUM(EVENT_DATA:soft_currency1_spent::INT) AS "FOOD_LOST",
+    SUM(EVENT_DATA:soft_currency2_earned::INT) AS "WOOD_EARNED",
+    SUM(EVENT_DATA:soft_currency2_spent::INT) AS "WOOD_LOST",
+    SUM(EVENT_DATA:soft_currency3_earned::INT) AS "STONE_EARNED",
+    SUM(EVENT_DATA:soft_currency3_spent::INT) AS "STONE_LOST",
+    SUM(EVENT_DATA:soft_currency4_earned::INT) AS "IRON_EARNED",
+    SUM(EVENT_DATA:soft_currency4_spent::INT) AS "IRON_LOST",
+    SUM(EVENT_DATA:soft_currency5_earned::INT) AS "SILVER_EARNED",
+    SUM(EVENT_DATA:soft_currency5_spent::INT) AS "SILVER_LOST",
+    (GOLD_EARNED+FOOD_EARNED+WOOD_EARNED+STONE_EARNED+IRON_EARNED+SILVER_EARNED) AS "TOTAL_RSS_EARNED",
+    (GOLD_SPENT+FOOD_LOST+WOOD_LOST+STONE_LOST+IRON_LOST+SILVER_LOST) AS "TOTAL_RSS_LOST"
+
+FROM
+    "ELEPHANT_DB"."MOE"."RESOURCE_CHANGE_RAW" AS T_RSS
+
+LEFT JOIN
+    "ELEPHANT_DB"."DIMENSIONS"."ELEMENT" AS T_EVENT
+        ON (T_RSS.EVENT_DATA:change_int::INT = T_EVENT.ID)
+        
+WHERE
+    CLIENT_TIME >= '{st_date}'
+    AND CLIENT_TIME < '{end_date}'
+    AND FED = '{account}'
+    
+GROUP BY
+    DATE,
+    SILO,
+    FED,
+    REALM,
+    ENEMY_FED,
+    INT_NAME
+
+HAVING
+    TOTAL_RSS_EARNED > 0
+    OR TOTAL_RSS_LOST > 0
+
+ORDER BY
+    FROM_ ASC
+
+LIMIT 10000
+;
+'''
